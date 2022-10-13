@@ -1,0 +1,73 @@
+# These settings are for any web project
+
+# Handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
+* text=auto
+
+# Force the following filetypes to have unix eols, so Windows does not break them
+*.* text eol=lf
+
+# Windows forced line-endings
+/.idea/* text eol=crlf
+# /.idea/* text eol=lf
+
+## These files are binary and should be left untouched
+
+# (binary is a macro for -text -diff)
+
+# Video/Audio
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.wav binary
+
+# Application
+*.gz binary
+*.7z binary
+*.zip binary
+*.ez binary
+*.bz2 binary
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# Documents
+*.doc diff=astextplain
+*.DOC diff=astextplain
+*.docx diff=astextplain
+*.DOCX diff=astextplain
+*.dot diff=astextplain
+*.DOT diff=astextplain
+*.pdf diff=astextplain
+*.PDF diff=astextplain
+*.rtf diff=astextplain
+*.RTF diff=astextplain
+*.md text
+*.tex text
+*.adoc text
+*.textile text
+*.mustache text
+*.csv text
+*.tab text
+*.tsv text
+*.sql text
+
+# Graphics
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.tif binary
+*.tiff binary
+*.ico binary
+*.svg binary
+*.eps binary
+*.webp binary
+*.avif binary
+
+# Exclude files from export
+.gitattributes export-ignore
+.gitignore export-ignore

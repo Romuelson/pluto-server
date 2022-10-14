@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-import { configuration } from './config/configuration';
-
 !(async () => {
-	const { port } = configuration();
+	const PORT = parseInt(process.env.PORT || '80', 10);
 
 	const app = await NestFactory.create(AppModule);
-	await app.listen(port, () => `[Nest]: started on port - ${port}`);
+
+	await app.listen(PORT, () => `[Nest]: started on port - ${PORT}`);
 })();

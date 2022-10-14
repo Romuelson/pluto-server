@@ -16,6 +16,6 @@ indent_style = ignore
 trim_trailing_whitespace = false
 insert_final_newline = ignore
 
-[{package.json,package-lock.json,.travis.yml}]
+[{package.json,package-lock.json,.travis.yml,*.yaml}]
 indent_style = space
 indent_size = 2

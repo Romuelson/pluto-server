@@ -1,10 +1,19 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+
 import { AppModule } from './app.module';
 
+import { openApiSetup } from './common/openapi/openapi-setup';
+import { ConfigurationService } from './config/configuration.service';
+
 !(async () => {
-	const PORT = parseInt(process.env.PORT || '80', 10);
+	const app = await NestFactory.create<NestExpressApplication>(AppModule);
+	const { port } = app.get(ConfigurationService).httpConfig();
 
-	const app = await NestFactory.create(AppModule);
+	openApiSetup(app);
 
-	await app.listen(PORT, () => `[Nest]: started on port - ${PORT}`);
+	app.setGlobalPrefix('api');
+	// app.enableCors();
+
+	await app.listen(port, () => `[Nest]: started on port - ${port}`);
 })();

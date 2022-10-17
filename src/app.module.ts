@@ -1,22 +1,25 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ProductModule } from './modules/product/product.module';
+import { ConfigurationModule } from './config/configuration.module';
 
-import configuration from './config/configuration';
+import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
 	imports: [
-		ConfigModule.forRoot({
-			envFilePath: [
-				`.env/.env.${process.env.NODE_ENV}`,
-				`.env/.env.${process.env.NODE_ENV}.local`,
-			],
-			load: configuration,
+		ConfigurationModule,
+		MongooseModule.forRoot(process.env.MONGODB_URI || '', {
+			connectionFactory: (connection) => {
+				connection.plugin(require('mongoose-autopopulate'));
+				return connection;
+			},
 		}),
+		ProductModule,
+		CategoryModule,
 	],
-	controllers: [AppController],
-	providers: [AppService],
+	providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
 })
 export class AppModule {}

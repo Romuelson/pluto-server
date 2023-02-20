@@ -1,8 +1,3 @@
-// import { Controller } from '@nestjs/common';
-
-// @Controller('category')
-// export class CategoryController {}
-
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import {
@@ -18,9 +13,11 @@ import {
 
 import { EOpenApiSummary } from '../../common/openapi/openapi.enum';
 
-import * as DTO from './dto/create-category.dto';
 import { Category } from './schemas/category.schema';
 import { CategoryService } from './category.service';
+
+import { CreateCategoryDTO } from './dto/create-category.dto';
+import { UpdateCategoryDTO } from './dto/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -30,7 +27,7 @@ export class CategoryController {
 	@ApiResponse({ status: HttpStatus.CREATED, type: Category })
 	@Post()
 	async create(
-		@Body() createCategoryDTO: DTO.CreateCategoryDTO,
+		@Body() createCategoryDTO: CreateCategoryDTO,
 	): Promise<Category> {
 		return await this.categoryService.create(createCategoryDTO);
 	}
@@ -53,7 +50,7 @@ export class CategoryController {
 	@ApiResponse({ status: HttpStatus.OK, type: Category })
 	@Put(':id')
 	async update(
-		@Body() updateCategoryDTO: DTO.UpdateCategoryDTO,
+		@Body() updateCategoryDTO: UpdateCategoryDTO,
 		@Param('id') id: string,
 	): Promise<Category> {
 		return await this.categoryService.update(id, updateCategoryDTO);

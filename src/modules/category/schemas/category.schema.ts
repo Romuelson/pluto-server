@@ -1,5 +1,3 @@
-import { Document } from 'mongoose';
-
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
@@ -15,7 +13,7 @@ export class Category {
 	@Prop({ type: Boolean, default: true })
 	public state: boolean;
 
-	@ApiProperty({ example: 'true', description: 'Дата' })
+	@ApiProperty({ example: '1666026414729', description: 'Дата (Date.now)' })
 	@Prop({ type: () => Date, default: Date.now })
 	public createdAt: Date;
 }

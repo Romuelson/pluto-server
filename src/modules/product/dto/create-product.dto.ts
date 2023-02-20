@@ -1,34 +1,50 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { plainToInstance, Transform, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
-import { Image } from '../schemas/classes/image.nesting';
+import { TCreateProductDTO } from '../interfaces/product.interface';
 
-import { Category } from 'src/modules/category/schemas/category.schema';
-import { ECategoryNames } from 'src/modules/category/enum/category.enum';
+import { CreateProductViewDTO } from 'src/modules/product-view/dto/create-product-view.dto';
+import { CreateInstanceDTO } from 'src/modules/instance/dto/create-instance.dto';
 
-export class CreateProductDTO {
-	@ApiProperty({ example: 'Бюстгальтер', description: 'Наименование' })
-	@IsNotEmpty()
-	@MinLength(4, { message: 'Мин. длина заголовка 4 символа' })
-	@MaxLength(20, { message: 'Макс. длина заголовка 20 символов' })
-	readonly title: string;
+export const TFileMulterArray = {
+	type: 'array',
+	items: {
+		type: 'file',
+		items: {
+			type: 'string',
+			format: 'binary',
+		},
+	},
+};
 
-	@ApiProperty({ example: 'Коллекция белья', description: 'Описание' })
-	@IsNotEmpty()
-	@MinLength(8, { message: 'Мин. длина описания 8 символов' })
-	@MaxLength(250, { message: 'Макс. длина описания 250 символов' })
-	readonly description: string;
+export class CreateProductDTO implements TCreateProductDTO {
+	@ApiProperty({ type: CreateProductViewDTO })
+	@Transform(({ value }) => plainToInstance(CreateProductViewDTO, JSON.parse(value)))
+	@Type(() => CreateProductViewDTO)
+	readonly productViewDTO: CreateProductViewDTO;
 
-	@ApiProperty({ description: 'Наименования изображений' })
-	@IsNotEmpty()
-	readonly image: Image;
+	@ApiProperty({ type: CreateInstanceDTO })
+	@Transform(({ value }) => plainToInstance(CreateInstanceDTO, JSON.parse(value)))
+	@Type(() => CreateInstanceDTO)
+	readonly instanceDTO: CreateInstanceDTO;
 
-	@ApiProperty({
-		example: [ECategoryNames.underwear],
-		description: 'Список категории',
-	})
-	@IsNotEmpty()
-	readonly category: Category[];
+	/* ... */
+
+	@ApiProperty(TFileMulterArray)
+	readonly frontside: Express.Multer.File[];
+
+	@ApiProperty(TFileMulterArray)
+	readonly backside: Express.Multer.File[];
+
+	@ApiProperty(TFileMulterArray)
+	readonly overallFrontside: Express.Multer.File[];
+
+	@ApiProperty(TFileMulterArray)
+	readonly overallBackside: Express.Multer.File[];
+
+	@ApiProperty(TFileMulterArray)
+	readonly productFrontside: Express.Multer.File[];
+
+	@ApiProperty(TFileMulterArray)
+	readonly productBackside: Express.Multer.File[];
 }
-
-export class UpdateProductDTO extends PartialType(CreateProductDTO) {}

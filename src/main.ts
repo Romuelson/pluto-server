@@ -1,19 +1,23 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from './app.module';
 
+import { configSetup } from './config/config';
 import { openApiSetup } from './common/openapi/openapi-setup';
-import { ConfigurationService } from './config/configuration.service';
 
 !(async () => {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
-	const { port } = app.get(ConfigurationService).httpConfig();
 
-	openApiSetup(app);
+	const { configPath, configHttp, configPrefix, configValidate } = await configSetup(app);
 
-	app.setGlobalPrefix('api');
-	// app.enableCors();
+	openApiSetup(app, { api: configPrefix.appPrefixApi });
 
-	await app.listen(port, () => `[Nest]: started on port - ${port}`);
+	app.setGlobalPrefix(configPrefix.appPrefixApi);
+	app.useStaticAssets(configPath.dirPublic, { prefix: configPrefix.appPrefixPublic });
+	// app.useGlobalPipes(new ValidationPipe(configValidate));
+	app.enableCors();
+
+	await app.listen(configHttp.port);
 })();

@@ -1,49 +1,27 @@
-import mongoose, { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Type } from 'class-transformer';
-import { Image } from './classes/image.nesting';
+import { IProduct } from '../interfaces/product.interface';
 
-import { Category } from 'src/modules/category/schemas/category.schema';
-import { ECategoryNames } from 'src/modules/category/enum/category.enum';
+import { ProductContainerDTO } from '../models/container.model';
 
-export type ProductDocument = Product & Document;
+export type ProductDocument = Product & Document<Types.ObjectId>;
 
 @Schema()
-export class Product {
-	@ApiProperty({ example: 'Бюстгальтер', description: 'Наименование' })
-	@Prop({ type: () => String, required: true })
-	public title: string;
-
-	@ApiProperty({ example: 'Коллекция белья', description: 'Описание' })
-	@Prop({ type: () => String, required: true })
-	public description: string;
-
-	/* вынести в отдельную сущность  */
-	@ApiProperty({ description: 'Наименования изображений' })
-	@Prop({ type: () => Image, required: true })
-	@Type(() => Image)
-	public image: Image;
-
-	@ApiProperty({
-		example: [ECategoryNames.underwear],
-		description: 'Список категории',
-	})
-	@Prop({
-		type: [
-			{
-				type: mongoose.Schema.Types.ObjectId,
-				ref: Category.name,
-				autopopulate: true,
-			},
-		],
-		required: true,
-	})
-	@Type(() => Category)
-	public category: Category[];
+export class Product implements IProduct {
+	@ApiProperty()
+	@Prop({ type: ProductContainerDTO })
+	public container: ProductContainerDTO | null;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
-export const ProductModel = { name: Product.name, schema: ProductSchema };
+
+export const ProductModel = {
+	name: Product.name,
+	useFactory: () => {
+		ProductSchema.plugin(require('mongoose-autopopulate'));
+		return ProductSchema;
+	},
+};

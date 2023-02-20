@@ -3,10 +3,11 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+import { Category, CategoryDocument } from './schemas/category.schema';
 import { EHttpException } from 'src/common/exceptions/http-exception.enum';
 
-import * as DTO from './dto/create-category.dto';
-import { Category, CategoryDocument } from './schemas/category.schema';
+import { CreateCategoryDTO } from './dto/create-category.dto';
+import { UpdateCategoryDTO } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -15,14 +16,11 @@ export class CategoryService {
 		private categoryModel: Model<CategoryDocument>,
 	) {}
 
-	async create(createCategoryDTO: DTO.CreateCategoryDTO): Promise<Category> {
+	async create(createCategoryDTO: CreateCategoryDTO): Promise<Category> {
 		const category = new this.categoryModel(createCategoryDTO).save();
 
 		if (!category) {
-			throw new HttpException(
-				EHttpException.create,
-				HttpStatus.NO_CONTENT,
-			);
+			throw new HttpException(EHttpException.create, HttpStatus.NO_CONTENT);
 		}
 
 		return category;
@@ -48,21 +46,13 @@ export class CategoryService {
 		return category;
 	}
 
-	async update(
-		id: string,
-		categoryProductDTO: DTO.UpdateCategoryDTO,
-	): Promise<Category> {
-		const category = await this.categoryModel.findByIdAndUpdate(
-			id,
-			categoryProductDTO,
-			{ new: true },
-		);
+	async update(id: string, categoryProductDTO: UpdateCategoryDTO): Promise<Category> {
+		const category = await this.categoryModel.findByIdAndUpdate(id, categoryProductDTO, {
+			new: true,
+		});
 
 		if (!category) {
-			throw new HttpException(
-				EHttpException.update,
-				HttpStatus.NOT_MODIFIED,
-			);
+			throw new HttpException(EHttpException.update, HttpStatus.NOT_MODIFIED);
 		}
 
 		return category;
@@ -74,10 +64,7 @@ export class CategoryService {
 		});
 
 		if (!category) {
-			throw new HttpException(
-				EHttpException.delete,
-				HttpStatus.NOT_MODIFIED,
-			);
+			throw new HttpException(EHttpException.delete, HttpStatus.NOT_MODIFIED);
 		}
 
 		return category;

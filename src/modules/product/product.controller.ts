@@ -1,21 +1,31 @@
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import {
 	Get,
-	Put,
 	Post,
 	Body,
 	Param,
 	Delete,
+	UsePipes,
 	Controller,
 	HttpStatus,
+	UploadedFiles,
+	ValidationPipe,
+	UseInterceptors,
 } from '@nestjs/common';
+
+import { EOpenApiSummary } from '../../common/openapi/openapi.enum';
+
+import { TFileFields } from '../file/interfaces/file.interface';
+import { IInstanceImageFiles } from '../instance-image/interfaces/instance-image.interface';
 
 import { Product } from './schemas/product.schema';
 import { ProductService } from './product.service';
 
-import { EOpenApiSummary } from '../../common/openapi/openapi.enum';
-import { CreateProductDTO, UpdateProductDTO } from './dto/create-product.dto';
+import { CreateProductDTO } from './dto/create-product.dto';
+import { CreateProductInstanceDTO } from './dto/create-product-instance.dto';
+import { Types } from 'mongoose';
 
 @Controller('product')
 export class ProductController {
@@ -23,9 +33,59 @@ export class ProductController {
 
 	@ApiOperation({ summary: EOpenApiSummary.create })
 	@ApiResponse({ status: HttpStatus.CREATED, type: Product })
-	@Post()
-	async create(@Body() createProductDTO: CreateProductDTO): Promise<Product> {
-		return await this.productService.create(createProductDTO);
+	@Post('create')
+	@ApiConsumes('multipart/form-data')
+	@UsePipes(new ValidationPipe({ transform: true }))
+	@UseInterceptors(
+		FileFieldsInterceptor([
+			{ name: 'frontside', maxCount: 1 },
+			{ name: 'backside', maxCount: 1 },
+
+			{ name: 'overallFrontside', maxCount: 1 },
+			{ name: 'overallBackside', maxCount: 1 },
+
+			{ name: 'productFrontside', maxCount: 1 },
+			{ name: 'productBackside', maxCount: 1 },
+		]),
+	)
+	async create(
+		@Body() createProductDTO: CreateProductDTO,
+		@UploadedFiles() fileFields: TFileFields<keyof IInstanceImageFiles>,
+	) {
+		return await this.productService.create({ createProductDTO, fileFields });
+	}
+
+	@ApiOperation({ summary: EOpenApiSummary.create })
+	@ApiResponse({ status: HttpStatus.CREATED, type: Product })
+	@Post('instance')
+	@ApiConsumes('multipart/form-data')
+	@UsePipes(new ValidationPipe({ transform: true }))
+	@UseInterceptors(
+		FileFieldsInterceptor([
+			{ name: 'frontside', maxCount: 1 },
+			{ name: 'backside', maxCount: 1 },
+
+			{ name: 'overallFrontside', maxCount: 1 },
+			{ name: 'overallBackside', maxCount: 1 },
+
+			{ name: 'productFrontside', maxCount: 1 },
+			{ name: 'productBackside', maxCount: 1 },
+		]),
+	)
+	async createInstance(
+		@Body() DTO: CreateProductInstanceDTO,
+		@UploadedFiles() fileFields: TFileFields<keyof IInstanceImageFiles>,
+	) {
+		const product_id = new Types.ObjectId(DTO.product_id);
+
+		const res = await this.productService.createInstance({
+			productInstanceProps: { ...DTO, product_id },
+			fileFields,
+		});
+
+		await this.productService.syncContainer({ product_id });
+
+		return res;
 	}
 
 	@ApiOperation({ summary: EOpenApiSummary.findAll })
@@ -40,16 +100,6 @@ export class ProductController {
 	@Get(':id')
 	async findById(@Param('id') id: string): Promise<Product> {
 		return await this.productService.findById(id);
-	}
-
-	@ApiOperation({ summary: EOpenApiSummary.update })
-	@ApiResponse({ status: HttpStatus.OK, type: Product })
-	@Put(':id')
-	async update(
-		@Body() updateProductDTO: UpdateProductDTO,
-		@Param('id') id: string,
-	): Promise<Product> {
-		return await this.productService.update(id, updateProductDTO);
 	}
 
 	@ApiOperation({ summary: EOpenApiSummary.delete })

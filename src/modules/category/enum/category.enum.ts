@@ -1,3 +1,3 @@
 export const enum ECategoryNames {
-	underwear = '634d8bae2a60e8d8122a4707',
+	underwear = '634e8ce23f3a8e24978de272',
 }
